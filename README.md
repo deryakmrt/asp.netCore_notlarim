@@ -1,1 +1,1 @@
-# ap.netCore_notlarim
+# asp.netCore_notlarim
