@@ -1,0 +1,62 @@
+cURL (Client URL), URL’ler üzerinden veri gönderip almamızı sağlayan bir komut satırı (terminal) aracıdır. 
+İnternetteki kaynaklara HTTP, HTTPS, FTP gibi protokoller üzerinden erişip GET, POST, PUT, DELETE gibi istekler yapabilmemizi sağlar.
+
+🧠 Özellikle REST API kullanırken test amaçlı çok işe yarar. Örneğin bir API’ye sorgu göndermek, veri çekmek veya veri göndermek için kullanılır.
+
+cURL, aslında Postman gibi araçların yaptığı işi terminal üzerinden yapmanı sağlayan bir araçtır. Yani:
+
+💬 "Ben Postman'le GET, POST istekleri atıyorum" diyorsan,
+🖥️ "cURL ile bunları komut satırından yapabilirsin" demek.
+
+----------------------------------------------------------------------
+🔧 Sık Kullanılan Komut Seçenekleri (Flags)
+
+Seçenek	Açıklama
+-i veya --include	HTTP başlıklarını da gösterir
+-I veya --head		Sadece HTTP başlıklarını döndürür
+-o <dosya>		Çıktıyı bir dosyaya yazdırır
+-v veya --verbose	Detaylı çıktı verir (istek gidişi/gelişi dahil)
+
+----------------------------------------------------------------------
+📚 Örnek Komutlar ve Açıklamaları
+🔎 GET: Veri Çekme
+Bir Star Wars filmi detayını getir (SWAPI):
+curl https://swapi.dev/api/films/1/
+
+API anahtarınla doğrudan sorgu:
+curl https://api.themoviedb.org/3/movie/popular?api_key=your_api_key
+
+🔧 GET: Detaylı Film Bilgisi (ID ile)
+curl -X GET -G -d api_key=your_api_key https://api.themoviedb.org/3/movie/:movie_id
+:movie_id kısmına film ID’si yazılır.
+----------------------------------------------------------------------
+👨‍💼 Fake API Kullanımı (Localhost üzerinden)
+
+👥 Tüm çalışanları getir:
+curl http://localhost:3000/employees
+
+👤 Bir çalışan detayını getir:
+curl http://localhost:3000/employees/:employee_id
+
+➕ Yeni çalışan ekle:
+curl -X POST -H "Content-Type: application/json" \
+-d '{ "first_name": "Ricardo", "last_name": "Quaresma", "email": "ricardo@test.tr", "gender": "Male", "roleId": 3 }' \
+http://localhost:3000/employees
+
+❌ Çalışanı sil:
+curl -X DELETE http://localhost:3000/employees/:employee_id
+
+🔄 Güncelle (PATCH – sadece belli alanlar):
+curl -X PATCH -H "Content-Type: application/json" \
+-d '{ "first_name": "Ricardo", "last_name": "Quaresma"}' \
+http://localhost:3000/employees/:employee_id
+
+🔁 Güncelle (PUT – tüm veriyi yeniler):
+curl -X PUT -H "Content-Type: application/json" \
+-d '{ "first_name": "Ricardo", "last_name": "Quaresma"}' \
+http://localhost:3000/employees/:employee_id
+----------------------------------------------------------------------
+🎓 Kısaca Özet:
+cURL, URL'ler üzerinden veri transferi yapmamızı sağlayan güçlü bir araçtır.
+En çok API testlerinde işe yarar.
+Terminal üzerinden hızlıca veri gönderip alabilir, POST/GET gibi işlemleri kolayca test edebilirsin.

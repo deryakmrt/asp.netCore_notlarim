@@ -1,0 +1,139 @@
+PUT ve PATCH farkı:
+PUT, bir kaynağın tamamını güncellemek için kullanılır. Yani, var olan verinin
+üzerine yazılır ve eksik alanlar varsa silinir.
+
+Örnek:
+PUT /users/1  
+{
+  "name": "Gurcan",
+  "age": 40
+}
+Bu istek, kullanıcı 1’in tüm bilgilerini bu şekilde tamamen günceller. 
+Eğer eskiden bir “email” bilgisi varsa ve burada yoksa, o bilgi silinir.
+
+PATCH ise bir kaynağın sadece belirli alanlarını güncellemek için kullanılır. 
+Yani kısmi güncelleme yapar.
+
+Örnek:
+PATCH /users/1  
+{
+  "name": "Gurcan"
+}
+Bu istek, sadece “name” alanını günceller, diğer alanlara dokunmaz.
+
+İstersen kısa bir özet de şöyle verebilirsin:
+
+“PUT tüm veriyi değiştirir, PATCH ise sadece gerekli alanları.”
+------------------------------------------------------------------
+PUT’un temel mantığı:
+"Belirtilen URI’ye, gönderilen içeriği koy."
+Yani:
+URI varsa → üzerine yazılır (güncelleme).
+URI yoksa → yeni olarak oluşturulur (oluşturma)
+
+İstemci, oluşturulacak nesnenin ID’sini veya URI’sini kendisi belirlemek istiyorsa, PUT uygundur.
+
+REST dünyasında:
+Yeni kaynak oluşturmak genelde POST ile yapılır.
+
+Belirli URI'ye kaynak koymak PUT ile yapılır.
+
+---------------------------------------------------------------
+🔁 Idempotency Nedir?
+📘 Tanım:
+Bir HTTP isteği kaç kez tekrarlanırsa tekrarlansın, sistem üzerindeki sonucu değişmeyen işlemlere idempotent denir.
+
+💡 Yani aynı isteği 1 kere yapmakla, 100 kere yapmak sistem üzerinde aynı etkiye sahiptir.
+
+🔍 REST’te HTTP Metodları ve Idempotency
+HTTP Metodu	Idempotent mi?	Açıklama
+GET	✅ Evet	Her çağrıda sadece veri getirir, sistem değişmez.
+PUT	✅ Evet	Aynı kaynağı tekrar tekrar aynı şekilde güncellemek, sonucu değiştirmez.
+DELETE	✅ Evet	Bir şeyi silmek 1. seferde siler, sonrakiler etki etmez (zaten silinmiş olur).
+POST	❌ Hayır	Her çağrı yeni bir kaynak oluşturabilir → sonucu değişir.
+PATCH	❌ Genellikle Hayır	Kısmi güncelleme yapar, genellikle sonucu değiştirir (duruma göre değişebilir).
+
+🤔 Neden Önemli?
+Ağ sorunlarında istemci bir isteği tekrar göndermek zorunda kalabilir.
+Eğer bu istek idempotent değilse, veri bozulabilir.
+O yüzden:
+PUT/DELETE gibi işlemler güvenle tekrar edilebilir.
+POST işlemlerinde ise dikkatli olmak gerekir.
+
+🧠 Ekstra Not:
+Idempotency, işlemin sonucu ile ilgilidir, cevap (response) ile değil.
+Yani bir DELETE isteği her seferinde "204 No Content" dönse de, önemli olan arka planda aynı etkiyi bırakmasıdır.
+
+✅ Özetle:
+REST mimarisinde GET, PUT, DELETE gibi işlemler genellikle idempotenttir.
+POST idempotent değildir çünkü her çağrıda yeni kaynak oluşturur.
+Bu kavram, API’lerin güvenilir ve tekrarlanabilir olmasını sağlar.
+---------------------------------------------------------------
+🧭 RESTful API'de Hypermedia Nedir?
+📘 Tanım:
+Hypermedia, bir API cevabının içinde, istemcinin takip edebileceği linkler (yönlendirmeler) barındırmasıdır.
+Bu linkler, istemciye ne yapabileceğini dinamik olarak gösterir.
+
+🔍 HATEOAS Nedir?
+Hypermedia REST içinde genelde şu isimle geçer:
+HATEOAS = Hypermedia As The Engine Of Application State
+
+📌 Bu REST’in 6. kuralıdır ve şunu der:
+İstemci, sunucudan gelen cevaplarda, uygulamanın mevcut durumu hakkında bilgi ve sonraki adımlara dair linkler almalıdır.
+
+📦 Örnek: HATEOAS Kullanan Bir RESTful API
+Normal bir REST cevabı şöyle olabilir:
+{
+  "id": 5,
+  "name": "Ahmet",
+  "age": 25
+}
+Ama hypermedia eklenmiş hali şöyle olur:
+{
+  "id": 5,
+  "name": "Ahmet",
+  "age": 25,
+  "_links": {
+    "self": { "href": "/users/5" },
+    "delete": { "href": "/users/5", "method": "DELETE" },
+    "update": { "href": "/users/5", "method": "PUT" },
+    "friends": { "href": "/users/5/friends" }
+  }
+}
+
+🔁 Ne işe yarar?
+İstemci, bu kullanıcıyla ne yapılabileceğini hemen görür.
+API dokümantasyonu ezberlemeye gerek kalmaz.
+“Kullanıcının arkadaşlarını getir”, “kendisini sil” gibi işlemleri sunucu yönlendirir.
+
+🎯 Hypermedia'ın Avantajları:
+✅ Kendi kendini yönlendiren sistem: API nasıl kullanılmalı? Cevaplar bunu gösterir.
+✅ Gevşek bağlılık (loose coupling): İstemci, arka uçtaki değişimlere daha dayanıklı olur.
+✅ Makine tarafından keşfedilebilir API sağlar.
+
+🧱 Gerçekte Ne Kadar Kullanılıyor?
+HATEOAS REST’in kurallarından biridir, ama pratikte birçok RESTful API bu özelliği kullanmıyor.
+
+Bunun yerine sadece JSON veri döndürüp işleri frontend'e bırakıyorlar.
+Ama bankacılık, e-ticaret gibi büyük sistemlerde hypermedia bazen tercih edilir.
+
+Ama pragmatik yaklaşım, şunu söyler:
+🧠 “HATEOAS çok ideal ama çoğu zaman fazladan karmaşa ve yük getiriyor. Gerekmedikçe kullanma.”
+
+🎒 Neden HATEOAS Genelde Kullanılmaz?
+Frontend zaten URI’leri biliyor.
+Dokümantasyon (Swagger, Postman) var.
+JSON daha sade ve anlaşılır kalıyor.
+Ek kod yazmak gerek (linkleri tek tek üretmek).
+Daha fazla veri = daha fazla ağ trafiği.
+---------------------------------------------------------------
+
+---------------------------------------------------------------
+
+---------------------------------------------------------------
+
+---------------------------------------------------------------
+
+---------------------------------------------------------------
+
+---------------------------------------------------------------
